@@ -19,17 +19,18 @@ public class Game {
 
     private static List<JsonObject> getTweets(String username) {
         HttpClient httpclient = new DefaultHttpClient();
-
-
         HttpUriRequest request = RequestBuilder.get()
-            .setUri(String.format("https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=%s&count=3200&exclude_replies=true&exclude_rts=false", username))
-            .setHeader("Authorization", "Bearer AAAAAAAAAAAAAAAAAAAAAOQNIAEAAAAAAagTFjwxaPdgIVNI7nM7xfNKjXI%3DFVsbBUqg9tmXC3k2BQUpWvuNlNnTWgh203HS2YufRnLagj87MT")
-            .build();
+                .setUri(String.format("https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name" +
+                        "=%s&count=3200" + "&exclude_replies=true&exclude_rts=false", username))
+                .setHeader("Authorization", "Bearer AAAAAAAAAAAAAAAAAAAAAOQNIAEAAAAAAagTFjwxaPdgIVNI7nM7xfNKjXI%" +
+                        "3DFVsbBUqg9tmXC3k2BQUpWvuNlNnTWgh203HS2YufRnLagj87MT")
+                .build();
 
         final ArrayList<JsonObject> jsonObjects = new ArrayList<>();
         try {
             HttpResponse execute = httpclient.execute(request);
-            for (JsonElement jsonElement : JsonParser.parseString(IOUtils.toString(execute.getEntity().getContent(), Charset.defaultCharset())).getAsJsonArray()) {
+            for (JsonElement jsonElement : JsonParser.parseString(IOUtils.toString(execute.getEntity().getContent(),
+                    Charset.defaultCharset())).getAsJsonArray()) {
                 final JsonObject asJsonObject = jsonElement.getAsJsonObject();
                 final String text = asJsonObject.get("text").getAsString();
                 if (!text.contains("https://t.co"))
@@ -42,6 +43,7 @@ public class Game {
         return jsonObjects;
     }
 
+
     public static void main(String[] args) {
 
         List<JsonObject> potentialTweets = new ArrayList<>(getTweets("elonmusk"));
@@ -51,7 +53,8 @@ public class Game {
         Scanner scanner = new Scanner(System.in);
         int correct = 0;
         int wrong = 0;
-        System.out.println("Welcome to get the idiot. Type the person you think tweeted the following phrases. Stop and view your score at any time with \"stop\"");
+        System.out.println("Welcome to guess who tweeted it. Type either Elon or Kanye based on who you think " +
+                "tweeted the following phrase. Stop and view your score at any time with \"stop\"");
         while (true) {
             final JsonObject jsonObject = potentialTweets.get(random.nextInt(potentialTweets.size()));
             int result = getAnswer(jsonObject, scanner);
@@ -59,7 +62,6 @@ public class Game {
             if (result == 0) {
                 break;
             } else {
-                System.out.println("Result: " + result);
                 wasCorrect = result == 1;
             }
             if (wasCorrect) {
@@ -89,7 +91,8 @@ public class Game {
             return 0;
         } else if (line.equalsIgnoreCase("kanye") || line.equalsIgnoreCase("elon")) {
             final String realUser = jsonObject.get("user").getAsJsonObject().get("screen_name").getAsString();
-            return (line.equalsIgnoreCase("kanye") && realUser.equalsIgnoreCase("kanyewest")) || (line.equalsIgnoreCase("elon") && realUser.equalsIgnoreCase("elonmusk")) ? 1 : 2;
+            return (line.equalsIgnoreCase("kanye") && realUser.equalsIgnoreCase("kanyewest")) ||
+                    (line.equalsIgnoreCase("elon") && realUser.equalsIgnoreCase("elonmusk")) ? 1 : 2;
         } else {
             System.out.println(line + " is not kanye or elon. Can you do better? ");
             return getAnswer(jsonObject, scanner);
